@@ -3,7 +3,7 @@ program WindowEnumeratorDemo;
 uses
   Vcl.Forms,
   Main in 'Main.pas' {MainForm},
-  WindowEnumerator in 'WindowEnumerator.pas';
+  WindowEnumerator in '..\WindowEnumerator.pas';
 
 {$R *.res}
 

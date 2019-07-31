@@ -6,6 +6,7 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Winapi.ActiveX,
+  System.Types,
   System.SysUtils,
   System.Generics.Collections;
 
@@ -33,6 +34,9 @@ type
 
   TWindowList = TObjectList<TWindow>;
 
+  TWindowRectFunction = reference to function(WindowHandle: HWND): TRect;
+  TWindowStringFunction = reference to function(WindowHandle: HWND): string;
+
   TWindowEnumerator = class
   private
     FWorkList: TWindowList;
@@ -43,6 +47,8 @@ type
     FOverlappedWindowsFilter: Boolean;
     FVirtualDesktopAvailable: Boolean;
     FVirtualDesktopManager: IVirtualDesktopManager;
+    FGetWindowRectFunction: TWindowRectFunction;
+    FGetWindowTextFunction: TWindowStringFunction;
 
     procedure FilterVirtualDesktop;
     procedure FilterOverlappedWindows;
@@ -51,6 +57,9 @@ type
   public
     constructor Create;
 
+    function GetWindowRect(WindowHandle: HWND): TRect;
+    function GetWindowText(WindowHandle: HWND): string;
+
     function Enumerate: TWindowList;
 
     property IncludeMask: NativeInt read FIncludeMask write FIncludeMask;
@@ -58,6 +67,9 @@ type
     property RequiredWindowInfos: TWindowInfos read FRequiredWindowInfos write FRequiredWindowInfos;
     property VirtualDesktopFilter: Boolean read FVirtualDesktopFilter write FVirtualDesktopFilter;
     property OverlappedWindowsFilter: Boolean read FOverlappedWindowsFilter write FOverlappedWindowsFilter;
+
+    property GetWindowRectFunction: TWindowRectFunction read FGetWindowRectFunction write FGetWindowRectFunction;
+    property GetWindowTextFunction: TWindowStringFunction read FGetWindowTextFunction write FGetWindowTextFunction;
   end;
 
 implementation
@@ -98,6 +110,8 @@ end;
 constructor TWindowEnumerator.Create;
 begin
   FVirtualDesktopAvailable := TOSVersion.Check(6, 3); // Windows 10
+  FGetWindowRectFunction := GetWindowRect;
+  FGetWindowTextFunction := GetWindowText;
 end;
 
 procedure TWindowEnumerator.FilterVirtualDesktop;
@@ -164,21 +178,6 @@ end;
 procedure TWindowEnumerator.FillWindowInfos;
 var
   Window: TWindow;
-
-  function GetWindowText: string;
-  var
-    TextLength: Integer;
-  begin
-    TextLength := Winapi.Windows.GetWindowTextLength(Window.Handle);
-    if TextLength > 0 then
-    begin
-      SetLength(Result, TextLength);
-      Winapi.Windows.GetWindowText(Window.Handle, PChar(Result), TextLength + 1);
-    end
-    else
-      Result := '';
-  end;
-
 begin
   if FRequiredWindowInfos = [] then
     Exit;
@@ -186,10 +185,30 @@ begin
   for Window in FWorkList do
   begin
     if wiRect in FRequiredWindowInfos then
-      Window.Text := GetWindowText;
+      Window.Rect := GetWindowRectFunction(Window.Handle);
     if wiText in FRequiredWindowInfos then
-      Winapi.Windows.GetWindowRect(Window.Handle, Window.Rect);
+      Window.Text := GetWindowTextFunction(Window.Handle);
   end;
+end;
+
+function TWindowEnumerator.GetWindowRect(WindowHandle: HWND): TRect;
+begin
+  if not Winapi.Windows.GetWindowRect(WindowHandle, Result) then
+    Result := TRect.Empty;
+end;
+
+function TWindowEnumerator.GetWindowText(WindowHandle: HWND): string;
+var
+  TextLength: Integer;
+begin
+  TextLength := Winapi.Windows.GetWindowTextLength(WindowHandle);
+  if TextLength > 0 then
+  begin
+    SetLength(Result, TextLength);
+    Winapi.Windows.GetWindowText(WindowHandle, PChar(Result), TextLength + 1);
+  end
+  else
+    Result := '';
 end;
 
 // Perform the window enumeration, apply the filters as configured and fill the infos
