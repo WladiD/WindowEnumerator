@@ -117,7 +117,7 @@ end;
 procedure TWindowEnumerator.FilterVirtualDesktop;
 var
   cc: Integer;
-  WinOnCurrentDesktop: Boolean;
+  WinOnCurrentDesktop: LongBool;
 begin
   for cc := FWorkList.Count - 1 downto 0 do
     if Succeeded(FVirtualDesktopManager.IsWindowOnCurrentVirtualDesktop(FWorkList[cc].Handle, @WinOnCurrentDesktop)) and
