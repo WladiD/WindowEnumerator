@@ -42,6 +42,7 @@ type
 
   private
     FWinEnumerator: TWindowEnumerator;
+    FSelectedWindow: TObject;
 
     procedure AutoSizeFilterPanels;
   end;
@@ -154,7 +155,6 @@ procedure TMainForm.EnumerateButtonClick(Sender: TObject);
   end;
 
 var
-  SelHandle: TObject;
   WinList: TWindowList;
   WinStrings: TStrings;
 begin
@@ -166,9 +166,7 @@ begin
     FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
 
     if MainListBox.ItemIndex >= 0 then
-      SelHandle := MainListBox.Items.Objects[MainListBox.ItemIndex]
-    else
-      SelHandle := nil;
+      FSelectedWindow := MainListBox.Items.Objects[MainListBox.ItemIndex];
 
     WinList := FWinEnumerator.Enumerate;
     try
@@ -182,8 +180,8 @@ begin
 
     MainListBox.Items.Assign(WinStrings);
 
-    if Assigned(SelHandle) then
-      MainListBox.ItemIndex := MainListBox.Items.IndexOfObject(SelHandle);
+    if Assigned(FSelectedWindow) then
+      MainListBox.ItemIndex := MainListBox.Items.IndexOfObject(FSelectedWindow);
 
     Caption := Format('Matched windows: %d', [WinStrings.Count]);
   finally
