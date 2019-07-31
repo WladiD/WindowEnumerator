@@ -92,6 +92,7 @@ begin
   AutoSizeFilterPanels;
 
   FWinEnumerator := TWindowEnumerator.Create;
+  FWinEnumerator.RequiredWindowInfos := [wiRect, wiText];
 
   AutoUpdateCheckBox.Checked := True;
 end;

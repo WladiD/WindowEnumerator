@@ -21,6 +21,9 @@ type
     function MoveWindowToDesktop(Wnd: HWND; const DesktopID: TGUID): HResult; stdcall;
   end;
 
+  TWindowInfo = (wiRect, wiText);
+  TWindowInfos = set of TWindowInfo;
+
   TWindow = class
   public
     Handle: HWND;
@@ -35,6 +38,7 @@ type
     FWorkList: TWindowList;
     FIncludeMask: NativeInt;
     FExcludeMask: NativeInt;
+    FRequiredWindowInfos: TWindowInfos;
     FVirtualDesktopFilter: Boolean;
     FOverlappedWindowsFilter: Boolean;
     FVirtualDesktopAvailable: Boolean;
@@ -51,6 +55,7 @@ type
 
     property IncludeMask: NativeInt read FIncludeMask write FIncludeMask;
     property ExcludeMask: NativeInt read FExcludeMask write FExcludeMask;
+    property RequiredWindowInfos: TWindowInfos read FRequiredWindowInfos write FRequiredWindowInfos;
     property VirtualDesktopFilter: Boolean read FVirtualDesktopFilter write FVirtualDesktopFilter;
     property OverlappedWindowsFilter: Boolean read FOverlappedWindowsFilter write FOverlappedWindowsFilter;
   end;
@@ -60,6 +65,7 @@ implementation
 function AddWindowToList(WindowHandle: THandle; Target: Pointer): Boolean; stdcall;
 var
   WE: TWindowEnumerator absolute Target;
+  Window: TWindow;
   WindowStyle: NativeInt;
 
   function HasStyle(CheckMask: FixedUInt): Boolean;
@@ -67,8 +73,6 @@ var
     Result := (WindowStyle and CheckMask) = CheckMask;
   end;
 
-var
-  Window: TWindow;
 begin
   Result := True;
   WindowStyle := GetWindowLong(WindowHandle, GWL_STYLE);
@@ -109,6 +113,7 @@ end;
 
 procedure TWindowEnumerator.FilterOverlappedWindows;
 
+  // Inspired from <https://stackoverflow.com/questions/35240177/function-to-check-if-a-window-is-visible-on-screen-does-not-work-on-windows-7>
   function IsWindowEffectiveVisible(Index: Integer): Boolean;
   var
     cc: Integer;
@@ -175,10 +180,15 @@ var
   end;
 
 begin
+  if FRequiredWindowInfos = [] then
+    Exit;
+
   for Window in FWorkList do
   begin
-    Window.Text := GetWindowText;
-    Winapi.Windows.GetWindowRect(Window.Handle, Window.Rect);
+    if wiRect in FRequiredWindowInfos then
+      Window.Text := GetWindowText;
+    if wiText in FRequiredWindowInfos then
+      Winapi.Windows.GetWindowRect(Window.Handle, Window.Rect);
   end;
 end;
 
