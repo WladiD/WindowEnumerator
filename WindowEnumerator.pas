@@ -127,28 +127,37 @@ end;
 
 procedure TWindowEnumerator.FilterOverlappedWindows;
 
+  function IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
+  var
+    Placement: TWindowPlacement;
+  begin
+    Rect := GetWindowRectFunction(Handle);
+    Result := not Rect.IsEmpty and not IsIconic(Handle);
+    if Result then
+    begin
+      Placement.length := SizeOf(TWindowPlacement);
+      if GetWindowPlacement(Handle, Placement) and (Placement.showCmd = SW_SHOWMINIMIZED) then
+        Result := False;
+    end;
+  end;
+
   // Inspired from <https://stackoverflow.com/questions/35240177/function-to-check-if-a-window-is-visible-on-screen-does-not-work-on-windows-7>
   function IsWindowEffectiveVisible(Index: Integer): Boolean;
   var
     cc: Integer;
-    RefHandle, TestHandle: HWND;
     RefRect, TestRect: TRect;
     RefRegion, TestRegion: HRGN;
     CombineResult: Integer;
   begin
     Result := False;
-    RefHandle := FWorkList[Index].Handle;
 
-    if not Winapi.Windows.GetWindowRect(RefHandle, RefRect) and RefRect.IsEmpty then
+    if not IsWindowVisible(FWorkList[Index].Handle, RefRect) then
       Exit;
 
     RefRegion := CreateRectRgnIndirect(RefRect);
     try
       for cc := Index - 1 downto 0 do
-      begin
-        TestHandle := FWorkList[cc].Handle;
-        if not IsIconic(TestHandle) and Winapi.Windows.GetWindowRect(TestHandle, TestRect) and
-          not TestRect.IsEmpty then
+        if IsWindowVisible(FWorkList[cc].Handle, TestRect) then
         begin
           TestRegion := CreateRectRgnIndirect(TestRect);
           try
@@ -159,7 +168,6 @@ procedure TWindowEnumerator.FilterOverlappedWindows;
             DeleteObject(TestRegion);
           end;
         end;
-      end;
     finally
       DeleteObject(RefRegion);
     end;
