@@ -9,6 +9,7 @@ uses
   System.SysUtils,
   System.Variants,
   System.Classes,
+  System.StrUtils,
   Vcl.Graphics,
   Vcl.Controls,
   Vcl.Forms,
@@ -35,6 +36,7 @@ type
     Label1: TLabel;
     FilterSelfCheckBox: TCheckBox;
     OptionsFlowPanel: TFlowPanel;
+    FilterCloakedWindowsCheckBox: TCheckBox;
     procedure EnumerateButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -94,7 +96,7 @@ begin
   AutoSizeFilterPanels;
 
   FWinEnumerator := TWindowEnumerator.Create;
-  FWinEnumerator.RequiredWindowInfos := [wiRect, wiText];
+  FWinEnumerator.RequiredWindowInfos := [wiRect, wiText, wiClassName];
 
   AutoUpdateCheckBox.Checked := True;
 end;
@@ -132,8 +134,8 @@ procedure TMainForm.EnumerateButtonClick(Sender: TObject);
     Result := TStringList.Create;
     try
       for WI in WindowList do
-        Result.AddObject(Format('Handle: %d; Rect: %s; Text: %s',
-          [WI.Handle, GetWindowRectAsString, WI.Text]), TObject(WI.Handle));
+        Result.AddObject(Format('Handle: %d; Rect: (%s); Text: "%s"; ClassName: "%s"',
+          [WI.Handle, GetWindowRectAsString, WI.Text, WI.ClassName]), TObject(WI.Handle));
     except
       Result.Free;
       raise;
@@ -165,6 +167,7 @@ begin
     FWinEnumerator.IncludeMask := GetCheckedMask(IncludeFilterPanel);
     FWinEnumerator.VirtualDesktopFilter := OnlyCurrendVDCheckBox.Checked;
     FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
+    FWinEnumerator.CloakedWindowsFilter := FilterCloakedWindowsCheckBox.Checked;
 
     if MainListBox.ItemIndex >= 0 then
       FSelectedWindow := MainListBox.Items.Objects[MainListBox.ItemIndex];

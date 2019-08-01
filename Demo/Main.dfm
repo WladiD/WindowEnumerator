@@ -25,7 +25,6 @@ object MainForm: TMainForm
     Height = 13
     Align = alBottom
     Caption = 'Filter by window style'
-    ExplicitTop = 386
     ExplicitWidth = 104
   end
   object MainListBox: TListBox
@@ -38,8 +37,6 @@ object MainForm: TMainForm
     ItemHeight = 13
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitWidth = 543
-    ExplicitHeight = 383
   end
   object IncludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -56,8 +53,6 @@ object MainForm: TMainForm
     BevelEdges = [beBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 434
-    ExplicitWidth = 523
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -73,8 +68,6 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 407
-    ExplicitWidth = 523
   end
   object EnumeratePanel: TPanel
     Left = 0
@@ -86,8 +79,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 3
-    ExplicitTop = 488
-    ExplicitWidth = 543
     object EnumerateButton: TButton
       Left = 113
       Top = 0
@@ -98,7 +89,6 @@ object MainForm: TMainForm
       Default = True
       TabOrder = 0
       OnClick = EnumerateButtonClick
-      ExplicitWidth = 430
     end
     object Panel1: TPanel
       Left = 0
@@ -130,7 +120,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 4
-    ExplicitTop = 457
     object Label1: TLabel
       Left = 3
       Top = 8
@@ -149,7 +138,6 @@ object MainForm: TMainForm
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitWidth = 387
       object FilterOverlappedWindowsCheckBox: TCheckBox
         AlignWithMargins = True
         Left = 3
@@ -178,6 +166,15 @@ object MainForm: TMainForm
         Height = 17
         Caption = 'Filter this window'
         TabOrder = 1
+      end
+      object FilterCloakedWindowsCheckBox: TCheckBox
+        AlignWithMargins = True
+        Left = 161
+        Top = 26
+        Width = 152
+        Height = 17
+        Caption = 'Filter cloaked windows'
+        TabOrder = 3
       end
     end
   end

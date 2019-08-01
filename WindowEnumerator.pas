@@ -6,6 +6,7 @@ uses
   Winapi.Windows,
   Winapi.Messages,
   Winapi.ActiveX,
+  Winapi.Dwmapi,
   System.Types,
   System.SysUtils,
   System.Generics.Collections;
@@ -22,7 +23,7 @@ type
     function MoveWindowToDesktop(Wnd: HWND; const DesktopID: TGUID): HResult; stdcall;
   end;
 
-  TWindowInfo = (wiRect, wiText);
+  TWindowInfo = (wiRect, wiText, wiClassName);
   TWindowInfos = set of TWindowInfo;
 
   TWindow = class
@@ -30,6 +31,7 @@ type
     Handle: HWND;
     Rect: TRect;
     Text: string;
+    ClassName: string;
   end;
 
   TWindowList = class(TObjectList<TWindow>)
@@ -49,13 +51,16 @@ type
     FRequiredWindowInfos: TWindowInfos;
     FVirtualDesktopFilter: Boolean;
     FOverlappedWindowsFilter: Boolean;
+    FCloakedWindowsFilter: Boolean;
     FVirtualDesktopAvailable: Boolean;
     FVirtualDesktopManager: IVirtualDesktopManager;
     FGetWindowRectFunction: TWindowRectFunction;
     FGetWindowTextFunction: TWindowStringFunction;
+    FGetWindowClassNameFunction: TWindowStringFunction;
 
     procedure FilterVirtualDesktop;
     procedure FilterOverlappedWindows;
+    procedure FilterCloakedWindows;
     procedure FillWindowInfos;
 
   public
@@ -63,6 +68,7 @@ type
 
     function GetWindowRect(WindowHandle: HWND): TRect;
     function GetWindowText(WindowHandle: HWND): string;
+    function GetWindowClassName(WindowHandle: HWND): string;
 
     function Enumerate: TWindowList;
 
@@ -71,9 +77,11 @@ type
     property RequiredWindowInfos: TWindowInfos read FRequiredWindowInfos write FRequiredWindowInfos;
     property VirtualDesktopFilter: Boolean read FVirtualDesktopFilter write FVirtualDesktopFilter;
     property OverlappedWindowsFilter: Boolean read FOverlappedWindowsFilter write FOverlappedWindowsFilter;
+    property CloakedWindowsFilter: Boolean read FCloakedWindowsFilter write FCloakedWindowsFilter;
 
     property GetWindowRectFunction: TWindowRectFunction read FGetWindowRectFunction write FGetWindowRectFunction;
     property GetWindowTextFunction: TWindowStringFunction read FGetWindowTextFunction write FGetWindowTextFunction;
+    property GetWindowClassNameFunction: TWindowStringFunction read FGetWindowClassNameFunction write FGetWindowClassNameFunction;
   end;
 
 implementation
@@ -106,6 +114,7 @@ begin
   FVirtualDesktopAvailable := TOSVersion.Check(6, 3); // Windows 10
   FGetWindowRectFunction := GetWindowRect;
   FGetWindowTextFunction := GetWindowText;
+  FGetWindowClassNameFunction := GetWindowClassName;
 end;
 
 procedure TWindowEnumerator.FilterVirtualDesktop;
@@ -177,6 +186,26 @@ begin
       FWorkList.Delete(cc);
 end;
 
+procedure TWindowEnumerator.FilterCloakedWindows;
+
+  function IsWindowCloaked(WindowHandle: HWND): Boolean;
+  const
+    DWMWA_CLOAKED = 14;
+  var
+    CloakedVal: NativeInt;
+  begin
+    Result := (DwmGetWindowAttribute(WindowHandle, DWMWA_CLOAKED, @CloakedVal, SizeOf(CloakedVal)) = S_OK) and
+      (CloakedVal <> 0);
+  end;
+
+var
+  cc: Integer;
+begin
+  for cc := FWorkList.Count - 1 downto 1 do
+    if IsWindowCloaked(FWorkList[cc].Handle) then
+      FWorkList.Delete(cc);
+end;
+
 procedure TWindowEnumerator.FillWindowInfos;
 var
   Window: TWindow;
@@ -190,6 +219,8 @@ begin
       Window.Rect := GetWindowRectFunction(Window.Handle);
     if wiText in FRequiredWindowInfos then
       Window.Text := GetWindowTextFunction(Window.Handle);
+    if wiClassName in FRequiredWindowInfos then
+      Window.ClassName := GetWindowClassNameFunction(Window.Handle);
   end;
 end;
 
@@ -211,6 +242,15 @@ begin
   end
   else
     Result := '';
+end;
+
+function TWindowEnumerator.GetWindowClassName(WindowHandle: HWND): string;
+var
+  NameLength: Integer;
+begin
+  SetLength(Result, 255);
+  NameLength := Winapi.Windows.GetClassName(WindowHandle, PChar(Result), Length(Result));
+  SetLength(Result, NameLength);
 end;
 
 function AddWindowToList(WindowHandle: THandle; Target: Pointer): Boolean; stdcall;
@@ -267,6 +307,8 @@ begin
       end;
       if FOverlappedWindowsFilter then
         FilterOverlappedWindows;
+      if FCloakedWindowsFilter then
+        FilterCloakedWindows;
       FillWindowInfos;
     except
       FWorkList.Free;
