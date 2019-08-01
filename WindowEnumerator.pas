@@ -32,7 +32,11 @@ type
     Text: string;
   end;
 
-  TWindowList = TObjectList<TWindow>;
+  TWindowList = class(TObjectList<TWindow>)
+  public
+    function IndexOf(WindowHandle: HWND): Integer;
+    procedure Remove(WindowHandle: HWND);
+  end;
 
   TWindowRectFunction = reference to function(WindowHandle: HWND): TRect;
   TWindowStringFunction = reference to function(WindowHandle: HWND): string;
@@ -74,35 +78,25 @@ type
 
 implementation
 
-function AddWindowToList(WindowHandle: THandle; Target: Pointer): Boolean; stdcall;
+{ TWindowList }
+
+function TWindowList.IndexOf(WindowHandle: HWND): Integer;
 var
-  WE: TWindowEnumerator absolute Target;
-  Window: TWindow;
-  WindowStyle: NativeInt;
-
-  function HasStyle(CheckMask: FixedUInt): Boolean;
-  begin
-    Result := (WindowStyle and CheckMask) = CheckMask;
-  end;
-
+  cc: Integer;
 begin
-  Result := True;
-  WindowStyle := GetWindowLong(WindowHandle, GWL_STYLE);
+  for cc := 0 to Count - 1 do
+    if Items[cc].Handle = WindowHandle then
+      Exit(cc);
+  Result := -1;
+end;
 
-  if (WE.ExcludeMask > 0) and HasStyle(WE.ExcludeMask) then
-    Exit;
-
-  if (WE.IncludeMask = 0) or HasStyle(WE.IncludeMask) then
-  begin
-    Window := TWindow.Create;
-    try
-      Window.Handle := WindowHandle;
-      WE.FWorkList.Add(Window);
-    except
-      Window.Free;
-      raise;
-    end;
-  end;
+procedure TWindowList.Remove(WindowHandle: HWND);
+var
+  Index: Integer;
+begin
+  Index := IndexOf(WindowHandle);
+  if Index >= 0 then
+    Delete(Index);
 end;
 
 { TWindowEnumerator }
@@ -217,6 +211,37 @@ begin
   end
   else
     Result := '';
+end;
+
+function AddWindowToList(WindowHandle: THandle; Target: Pointer): Boolean; stdcall;
+var
+  WE: TWindowEnumerator absolute Target;
+  Window: TWindow;
+  WindowStyle: NativeInt;
+
+  function HasStyle(CheckMask: FixedUInt): Boolean;
+  begin
+    Result := (WindowStyle and CheckMask) = CheckMask;
+  end;
+
+begin
+  Result := True;
+  WindowStyle := GetWindowLong(WindowHandle, GWL_STYLE);
+
+  if (WE.ExcludeMask > 0) and HasStyle(WE.ExcludeMask) then
+    Exit;
+
+  if (WE.IncludeMask = 0) or HasStyle(WE.IncludeMask) then
+  begin
+    Window := TWindow.Create;
+    try
+      Window.Handle := WindowHandle;
+      WE.FWorkList.Add(Window);
+    except
+      Window.Free;
+      raise;
+    end;
+  end;
 end;
 
 // Perform the window enumeration, apply the filters as configured and fill the infos

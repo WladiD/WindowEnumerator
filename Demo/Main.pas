@@ -33,6 +33,8 @@ type
     FilterOverlappedWindowsCheckBox: TCheckBox;
     OnlyCurrendVDCheckBox: TCheckBox;
     Label1: TLabel;
+    FilterSelfCheckBox: TCheckBox;
+    OptionsFlowPanel: TFlowPanel;
     procedure EnumerateButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -83,7 +85,6 @@ procedure TMainForm.FormCreate(Sender: TObject);
 
 begin
   AddFilterCheckBox('WS_CAPTION', WS_CAPTION, True);
-  AddFilterCheckBox('WS_CHILD', WS_CHILD);
   AddFilterCheckBox('WS_DISABLED', WS_DISABLED, False, True);
   AddFilterCheckBox('WS_POPUP', WS_POPUP);
   AddFilterCheckBox('WS_SYSMENU', WS_SYSMENU);
@@ -170,6 +171,8 @@ begin
 
     WinList := FWinEnumerator.Enumerate;
     try
+      if FilterSelfCheckBox.Checked then
+        WinList.Remove(Handle);
       WinStrings := CreateStringsFromWindowList(WinList);
     finally
       WinList.Free;
@@ -195,6 +198,9 @@ begin
   ExcludeFilterPanel.AutoSize := False;
   IncludeFilterPanel.AutoSize := True;
   IncludeFilterPanel.AutoSize := False;
+  OptionsFlowPanel.Left := 0;
+  OptionsPanel.AutoSize := True;
+  OptionsPanel.AutoSize := False;
 
   // The bottom order can be jumbled after AutoSize, so we must correct it
   FilterLabel.Top := MainListBox.Top + MainListBox.Height + 5;
