@@ -37,6 +37,7 @@ type
     FilterSelfCheckBox: TCheckBox;
     OptionsFlowPanel: TFlowPanel;
     FilterCloakedWindowsCheckBox: TCheckBox;
+    FilterHiddenWindowsCheckBox: TCheckBox;
     procedure EnumerateButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -166,6 +167,7 @@ begin
     FWinEnumerator.ExcludeMask := GetCheckedMask(ExcludeFilterPanel);
     FWinEnumerator.IncludeMask := GetCheckedMask(IncludeFilterPanel);
     FWinEnumerator.VirtualDesktopFilter := OnlyCurrendVDCheckBox.Checked;
+    FWinEnumerator.HiddenWindowsFilter := FilterHiddenWindowsCheckBox.Checked;
     FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
     FWinEnumerator.CloakedWindowsFilter := FilterCloakedWindowsCheckBox.Checked;
 

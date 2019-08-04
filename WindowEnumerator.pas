@@ -51,6 +51,7 @@ type
     FExcludeMask: NativeInt;
     FRequiredWindowInfos: TWindowInfos;
     FVirtualDesktopFilter: Boolean;
+    FHiddenWindowsFilter: Boolean;
     FOverlappedWindowsFilter: Boolean;
     FCloakedWindowsFilter: Boolean;
     FVirtualDesktopAvailable: Boolean;
@@ -60,9 +61,12 @@ type
     FGetWindowClassNameFunction: TWindowStringFunction;
 
     procedure FilterVirtualDesktop;
+    procedure FilterHiddenWindows;
     procedure FilterOverlappedWindows;
     procedure FilterCloakedWindows;
     procedure FillWindowInfos;
+
+    function IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
 
   public
     constructor Create;
@@ -77,6 +81,7 @@ type
     property ExcludeMask: NativeInt read FExcludeMask write FExcludeMask;
     property RequiredWindowInfos: TWindowInfos read FRequiredWindowInfos write FRequiredWindowInfos;
     property VirtualDesktopFilter: Boolean read FVirtualDesktopFilter write FVirtualDesktopFilter;
+    property HiddenWindowsFilter: Boolean read FHiddenWindowsFilter write FHiddenWindowsFilter;
     property OverlappedWindowsFilter: Boolean read FOverlappedWindowsFilter write FOverlappedWindowsFilter;
     property CloakedWindowsFilter: Boolean read FCloakedWindowsFilter write FCloakedWindowsFilter;
 
@@ -118,6 +123,24 @@ begin
   FGetWindowClassNameFunction := GetWindowClassName;
 end;
 
+function TWindowEnumerator.IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
+var
+  Placement: TWindowPlacement;
+  WindowMonitor: TMonitor;
+begin
+  Rect := GetWindowRectFunction(Handle);
+  Result := not Rect.IsEmpty and not IsIconic(Handle);
+  if Result then
+  begin
+    Placement.length := SizeOf(TWindowPlacement);
+    if GetWindowPlacement(Handle, Placement) and (Placement.showCmd = SW_SHOWMINIMIZED) then
+      Exit(False);
+
+    WindowMonitor := Screen.MonitorFromWindow(Handle, mdNull);
+    Result := Assigned(WindowMonitor) and (WindowMonitor.BoundsRect.IntersectsWith(Rect));
+  end;
+end;
+
 procedure TWindowEnumerator.FilterVirtualDesktop;
 var
   cc: Integer;
@@ -129,25 +152,17 @@ begin
       FWorkList.Delete(cc);
 end;
 
+procedure TWindowEnumerator.FilterHiddenWindows;
+var
+  cc: Integer;
+  Rect: TRect;
+begin
+  for cc := FWorkList.Count - 1 downto 0 do
+    if not IsWindowVisible(FWorkList[cc].Handle, Rect) then
+      FWorkList.Delete(cc);
+end;
+
 procedure TWindowEnumerator.FilterOverlappedWindows;
-
-  function IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
-  var
-    Placement: TWindowPlacement;
-    WindowMonitor: TMonitor;
-  begin
-    Rect := GetWindowRectFunction(Handle);
-    Result := not Rect.IsEmpty and not IsIconic(Handle);
-    if Result then
-    begin
-      Placement.length := SizeOf(TWindowPlacement);
-      if GetWindowPlacement(Handle, Placement) and (Placement.showCmd = SW_SHOWMINIMIZED) then
-        Exit(False);
-
-      WindowMonitor := Screen.MonitorFromWindow(Handle, mdNull);
-      Result := Assigned(WindowMonitor) and (WindowMonitor.BoundsRect.IntersectsWith(Rect));
-    end;
-  end;
 
   // Inspired from <https://stackoverflow.com/questions/35240177/function-to-check-if-a-window-is-visible-on-screen-does-not-work-on-windows-7>
   function IsWindowEffectiveVisible(Index: Integer): Boolean;
@@ -310,6 +325,8 @@ begin
         if FVirtualDesktopAvailable then
           FilterVirtualDesktop;
       end;
+      if FHiddenWindowsFilter then
+        FilterHiddenWindows;
       if FOverlappedWindowsFilter then
         FilterOverlappedWindows;
       if FCloakedWindowsFilter then

@@ -20,28 +20,30 @@ object MainForm: TMainForm
   object FilterLabel: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 375
+    Top = 352
     Width = 535
     Height = 13
     Align = alBottom
     Caption = 'Filter by window style'
+    ExplicitTop = 375
     ExplicitWidth = 104
   end
   object MainListBox: TListBox
     Left = 0
     Top = 0
     Width = 541
-    Height = 372
+    Height = 349
     Align = alClient
     DoubleBuffered = True
     ItemHeight = 13
     ParentDoubleBuffered = False
     TabOrder = 0
+    ExplicitHeight = 372
   end
   object IncludeFilterPanel: TFlowPanel
     AlignWithMargins = True
     Left = 10
-    Top = 423
+    Top = 400
     Width = 521
     Height = 17
     Margins.Left = 10
@@ -53,11 +55,12 @@ object MainForm: TMainForm
     BevelEdges = [beBottom]
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 423
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
     Left = 10
-    Top = 396
+    Top = 373
     Width = 521
     Height = 17
     Margins.Left = 10
@@ -68,6 +71,7 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitTop = 396
   end
   object EnumeratePanel: TPanel
     Left = 0
@@ -111,15 +115,16 @@ object MainForm: TMainForm
   end
   object OptionsPanel: TPanel
     Left = 0
-    Top = 445
+    Top = 422
     Width = 541
-    Height = 54
+    Height = 77
     Align = alBottom
     Alignment = taLeftJustify
     BevelEdges = [beTop]
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 4
+    ExplicitTop = 445
     object Label1: TLabel
       Left = 3
       Top = 8
@@ -132,15 +137,24 @@ object MainForm: TMainForm
       Left = 113
       Top = 3
       Width = 425
-      Height = 46
+      Height = 69
       Margins.Left = 113
       Align = alTop
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
-      object FilterOverlappedWindowsCheckBox: TCheckBox
+      object FilterHiddenWindowsCheckBox: TCheckBox
         AlignWithMargins = True
         Left = 3
+        Top = 3
+        Width = 152
+        Height = 17
+        Caption = 'Filter hidden windows'
+        TabOrder = 4
+      end
+      object FilterOverlappedWindowsCheckBox: TCheckBox
+        AlignWithMargins = True
+        Left = 161
         Top = 3
         Width = 152
         Height = 17
@@ -149,8 +163,8 @@ object MainForm: TMainForm
       end
       object OnlyCurrendVDCheckBox: TCheckBox
         AlignWithMargins = True
-        Left = 161
-        Top = 3
+        Left = 3
+        Top = 26
         Width = 202
         Height = 17
         Caption = 'Only current virtual desktop (Win 10)'
@@ -160,7 +174,7 @@ object MainForm: TMainForm
       end
       object FilterSelfCheckBox: TCheckBox
         AlignWithMargins = True
-        Left = 3
+        Left = 211
         Top = 26
         Width = 152
         Height = 17
@@ -169,8 +183,8 @@ object MainForm: TMainForm
       end
       object FilterCloakedWindowsCheckBox: TCheckBox
         AlignWithMargins = True
-        Left = 161
-        Top = 26
+        Left = 3
+        Top = 49
         Width = 152
         Height = 17
         Caption = 'Filter cloaked windows'
