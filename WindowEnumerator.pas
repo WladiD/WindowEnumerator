@@ -9,7 +9,8 @@ uses
   Winapi.Dwmapi,
   System.Types,
   System.SysUtils,
-  System.Generics.Collections;
+  System.Generics.Collections,
+  Vcl.Forms;
 
 const
   CLSID_VirtualDesktopManager: TGUID = '{AA509086-5CA9-4C25-8F95-589D3C07B48A}';
@@ -133,6 +134,7 @@ procedure TWindowEnumerator.FilterOverlappedWindows;
   function IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
   var
     Placement: TWindowPlacement;
+    WindowMonitor: TMonitor;
   begin
     Rect := GetWindowRectFunction(Handle);
     Result := not Rect.IsEmpty and not IsIconic(Handle);
@@ -140,7 +142,10 @@ procedure TWindowEnumerator.FilterOverlappedWindows;
     begin
       Placement.length := SizeOf(TWindowPlacement);
       if GetWindowPlacement(Handle, Placement) and (Placement.showCmd = SW_SHOWMINIMIZED) then
-        Result := False;
+        Exit(False);
+
+      WindowMonitor := Screen.MonitorFromWindow(Handle, mdNull);
+      Result := Assigned(WindowMonitor) and (WindowMonitor.BoundsRect.IntersectsWith(Rect));
     end;
   end;
 
@@ -181,7 +186,7 @@ procedure TWindowEnumerator.FilterOverlappedWindows;
 var
   cc: Integer;
 begin
-  for cc := FWorkList.Count - 1 downto 1 do
+  for cc := FWorkList.Count - 1 downto 0 do
     if not IsWindowEffectiveVisible(cc) then
       FWorkList.Delete(cc);
 end;
