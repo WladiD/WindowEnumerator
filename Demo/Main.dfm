@@ -25,7 +25,6 @@ object MainForm: TMainForm
     Height = 13
     Align = alBottom
     Caption = 'Filter by window style'
-    ExplicitTop = 375
     ExplicitWidth = 104
   end
   object MainListBox: TListBox
@@ -38,7 +37,6 @@ object MainForm: TMainForm
     ItemHeight = 13
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitHeight = 372
   end
   object IncludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -55,7 +53,6 @@ object MainForm: TMainForm
     BevelEdges = [beBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 423
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -71,7 +68,6 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 396
   end
   object EnumeratePanel: TPanel
     Left = 0
@@ -124,7 +120,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 4
-    ExplicitTop = 445
     object Label1: TLabel
       Left = 3
       Top = 8
@@ -143,6 +138,7 @@ object MainForm: TMainForm
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitTop = 2
       object FilterHiddenWindowsCheckBox: TCheckBox
         AlignWithMargins = True
         Left = 3
@@ -189,6 +185,15 @@ object MainForm: TMainForm
         Height = 17
         Caption = 'Filter cloaked windows'
         TabOrder = 3
+      end
+      object FilterMonitorCheckBox: TCheckBox
+        AlignWithMargins = True
+        Left = 161
+        Top = 49
+        Width = 152
+        Height = 17
+        Caption = 'Only current monitor'
+        TabOrder = 5
       end
     end
   end

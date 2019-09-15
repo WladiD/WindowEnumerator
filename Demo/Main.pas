@@ -38,6 +38,7 @@ type
     OptionsFlowPanel: TFlowPanel;
     FilterCloakedWindowsCheckBox: TCheckBox;
     FilterHiddenWindowsCheckBox: TCheckBox;
+    FilterMonitorCheckBox: TCheckBox;
     procedure EnumerateButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -170,6 +171,7 @@ begin
     FWinEnumerator.HiddenWindowsFilter := FilterHiddenWindowsCheckBox.Checked;
     FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
     FWinEnumerator.CloakedWindowsFilter := FilterCloakedWindowsCheckBox.Checked;
+    FWinEnumerator.MonitorFilter := FilterMonitorCheckBox.Checked;
 
     if MainListBox.ItemIndex >= 0 then
       FSelectedWindow := MainListBox.Items.Objects[MainListBox.ItemIndex];

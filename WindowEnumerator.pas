@@ -43,6 +43,7 @@ type
 
   TWindowRectFunction = reference to function(WindowHandle: HWND): TRect;
   TWindowStringFunction = reference to function(WindowHandle: HWND): string;
+  TMonitorFunction = reference to function: TMonitor;
 
   TWindowEnumerator = class
   private
@@ -54,16 +55,19 @@ type
     FHiddenWindowsFilter: Boolean;
     FOverlappedWindowsFilter: Boolean;
     FCloakedWindowsFilter: Boolean;
+    FMonitorFilter: Boolean;
     FVirtualDesktopAvailable: Boolean;
     FVirtualDesktopManager: IVirtualDesktopManager;
     FGetWindowRectFunction: TWindowRectFunction;
     FGetWindowTextFunction: TWindowStringFunction;
     FGetWindowClassNameFunction: TWindowStringFunction;
+    FGetCurrentMonitorFunction: TMonitorFunction;
 
     procedure FilterVirtualDesktop;
     procedure FilterHiddenWindows;
     procedure FilterOverlappedWindows;
     procedure FilterCloakedWindows;
+    procedure FilterMonitor;
     procedure FillWindowInfos;
 
     function IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
@@ -74,20 +78,29 @@ type
     function GetWindowRect(WindowHandle: HWND): TRect;
     function GetWindowText(WindowHandle: HWND): string;
     function GetWindowClassName(WindowHandle: HWND): string;
+    function GetCurrentMonitor: TMonitor;
 
     function Enumerate: TWindowList;
 
     property IncludeMask: NativeInt read FIncludeMask write FIncludeMask;
     property ExcludeMask: NativeInt read FExcludeMask write FExcludeMask;
     property RequiredWindowInfos: TWindowInfos read FRequiredWindowInfos write FRequiredWindowInfos;
+    // Defines, whether the windows which are placed on other virtual desktops should be filtered
     property VirtualDesktopFilter: Boolean read FVirtualDesktopFilter write FVirtualDesktopFilter;
+    // Defines, whether hidden or minimized windows should be filtered
     property HiddenWindowsFilter: Boolean read FHiddenWindowsFilter write FHiddenWindowsFilter;
+    // Defines, whether windows which are completely overlapped by other windows should be filtered
     property OverlappedWindowsFilter: Boolean read FOverlappedWindowsFilter write FOverlappedWindowsFilter;
+    // Defines, whether cloaked windows should be filtered
+    // Cloaked windows are new in Windows 10 and are used for mobile apps on desktop.
     property CloakedWindowsFilter: Boolean read FCloakedWindowsFilter write FCloakedWindowsFilter;
+    // Defines, whether the windows which are placed on other monitors should be filtered
+    property MonitorFilter: Boolean read FMonitorFilter write FMonitorFilter;
 
     property GetWindowRectFunction: TWindowRectFunction read FGetWindowRectFunction write FGetWindowRectFunction;
     property GetWindowTextFunction: TWindowStringFunction read FGetWindowTextFunction write FGetWindowTextFunction;
     property GetWindowClassNameFunction: TWindowStringFunction read FGetWindowClassNameFunction write FGetWindowClassNameFunction;
+    property GetCurrentMonitorFunction: TMonitorFunction read FGetCurrentMonitorFunction write FGetCurrentMonitorFunction;
   end;
 
 implementation
@@ -121,6 +134,7 @@ begin
   FGetWindowRectFunction := GetWindowRect;
   FGetWindowTextFunction := GetWindowText;
   FGetWindowClassNameFunction := GetWindowClassName;
+  FGetCurrentMonitorFunction := GetCurrentMonitor;
 end;
 
 function TWindowEnumerator.IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
@@ -139,6 +153,11 @@ begin
     WindowMonitor := Screen.MonitorFromWindow(Handle, mdNull);
     Result := Assigned(WindowMonitor) and (WindowMonitor.BoundsRect.IntersectsWith(Rect));
   end;
+end;
+
+function TWindowEnumerator.GetCurrentMonitor: TMonitor;
+begin
+  Result := Application.MainForm.Monitor;
 end;
 
 procedure TWindowEnumerator.FilterVirtualDesktop;
@@ -223,6 +242,31 @@ var
 begin
   for cc := FWorkList.Count - 1 downto 1 do
     if IsWindowCloaked(FWorkList[cc].Handle) then
+      FWorkList.Delete(cc);
+end;
+
+procedure TWindowEnumerator.FilterMonitor;
+var
+  CM: TMonitor; // CM = CurrentMonitor
+  cc: Integer;
+
+  function IsWindowOnCurrentMonitor(Window: TWindow): Boolean;
+  var
+    WinRect: TRect;
+    FullWinArea, LeftWinArea: Integer;
+  begin
+    WinRect := GetWindowRectFunction(Window.Handle);
+    FullWinArea := WinRect.Width * WinRect.Height;
+    WinRect := TRect.Intersect(WinRect, CM.BoundsRect);
+    LeftWinArea := WinRect.Width * WinRect.Height;
+    Result := (FullWinArea > 0) and ((LeftWinArea / FullWinArea) >= 0.5);
+  end;
+
+begin
+  CM := GetCurrentMonitorFunction;
+
+  for cc := FWorkList.Count - 1 downto 0 do
+    if not IsWindowOnCurrentMonitor(FWorkList[cc]) then
       FWorkList.Delete(cc);
 end;
 
@@ -331,6 +375,8 @@ begin
         FilterOverlappedWindows;
       if FCloakedWindowsFilter then
         FilterCloakedWindows;
+      if FMonitorFilter then
+        FilterMonitor;
       FillWindowInfos;
     except
       FWorkList.Free;
