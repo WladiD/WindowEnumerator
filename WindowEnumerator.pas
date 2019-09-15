@@ -157,7 +157,10 @@ end;
 
 function TWindowEnumerator.GetCurrentMonitor: TMonitor;
 begin
-  Result := Application.MainForm.Monitor;
+  if Assigned(Application.MainForm) then
+    Result := Application.MainForm.Monitor
+  else
+    Result := nil;
 end;
 
 procedure TWindowEnumerator.FilterVirtualDesktop;
@@ -264,6 +267,8 @@ var
 
 begin
   CM := GetCurrentMonitorFunction;
+  if not Assigned(CM) then
+    Exit;
 
   for cc := FWorkList.Count - 1 downto 0 do
     if not IsWindowOnCurrentMonitor(FWorkList[cc]) then
