@@ -33,12 +33,16 @@ type
     Rect: TRect;
     Text: string;
     ClassName: string;
+
+    procedure Assign(Source: TWindow);
   end;
 
   TWindowList = class(TObjectList<TWindow>)
   public
     function IndexOf(WindowHandle: HWND): Integer;
     procedure Remove(WindowHandle: HWND);
+
+    function Clone: TWindowList;
   end;
 
   TWindowRectFunction = reference to function(WindowHandle: HWND): TRect;
@@ -105,6 +109,16 @@ type
 
 implementation
 
+{ TWindow }
+
+procedure TWindow.Assign(Source: TWindow);
+begin
+  Handle := Source.Handle;
+  Rect := Source.Rect;
+  Text := Source.Text;
+  ClassName := Source.ClassName;
+end;
+
 { TWindowList }
 
 function TWindowList.IndexOf(WindowHandle: HWND): Integer;
@@ -124,6 +138,20 @@ begin
   Index := IndexOf(WindowHandle);
   if Index >= 0 then
     Delete(Index);
+end;
+
+function TWindowList.Clone: TWindowList;
+var
+  cc: Integer;
+  WindowClone: TWindow;
+begin
+  Result := TWindowList.Create(True);
+  for cc := 0 to Count - 1 do
+  begin
+    WindowClone := TWindow.Create;
+    WindowClone.Assign(Items[cc]);
+    Result.Add(WindowClone)
+  end;
 end;
 
 { TWindowEnumerator }
