@@ -41,6 +41,8 @@ type
   public
     function IndexOf(WindowHandle: HWND): Integer;
     procedure Remove(WindowHandle: HWND);
+    function HasFirst(out Window: TWindow): Boolean;
+    function HasLast(out Window: TWindow): Boolean;
 
     function Clone: TWindowList;
   end;
@@ -138,6 +140,20 @@ begin
   Index := IndexOf(WindowHandle);
   if Index >= 0 then
     Delete(Index);
+end;
+
+function TWindowList.HasFirst(out Window: TWindow): Boolean;
+begin
+  Result := Count > 0;
+  if Result then
+    Window := Items[0];
+end;
+
+function TWindowList.HasLast(out Window: TWindow): Boolean;
+begin
+  Result := Count > 0;
+  if Result then
+    Window := Items[Count - 1];
 end;
 
 function TWindowList.Clone: TWindowList;
