@@ -2,7 +2,7 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'MainForm'
-  ClientHeight = 546
+  ClientHeight = 588
   ClientWidth = 541
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -20,28 +20,30 @@ object MainForm: TMainForm
   object FilterLabel: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 352
+    Top = 374
     Width = 535
     Height = 13
     Align = alBottom
     Caption = 'Filter by window style'
+    ExplicitTop = 352
     ExplicitWidth = 104
   end
   object MainListBox: TListBox
     Left = 0
     Top = 0
     Width = 541
-    Height = 349
+    Height = 371
     Align = alClient
     DoubleBuffered = True
     ItemHeight = 13
     ParentDoubleBuffered = False
     TabOrder = 0
+    ExplicitHeight = 349
   end
   object IncludeFilterPanel: TFlowPanel
     AlignWithMargins = True
     Left = 10
-    Top = 400
+    Top = 422
     Width = 521
     Height = 17
     Margins.Left = 10
@@ -53,11 +55,12 @@ object MainForm: TMainForm
     BevelEdges = [beBottom]
     BevelOuter = bvNone
     TabOrder = 1
+    ExplicitTop = 400
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
     Left = 10
-    Top = 373
+    Top = 395
     Width = 521
     Height = 17
     Margins.Left = 10
@@ -68,10 +71,11 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelOuter = bvNone
     TabOrder = 2
+    ExplicitTop = 373
   end
   object EnumeratePanel: TPanel
     Left = 0
-    Top = 499
+    Top = 541
     Width = 541
     Height = 47
     Align = alBottom
@@ -79,6 +83,7 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 3
+    ExplicitTop = 499
     object EnumerateButton: TButton
       Left = 113
       Top = 0
@@ -103,7 +108,7 @@ object MainForm: TMainForm
         Top = 16
         Width = 97
         Height = 17
-        Caption = 'Auto update'
+        Caption = 'Auto refresh'
         TabOrder = 0
         OnClick = AutoUpdateCheckBoxClick
       end
@@ -111,15 +116,16 @@ object MainForm: TMainForm
   end
   object OptionsPanel: TPanel
     Left = 0
-    Top = 422
+    Top = 444
     Width = 541
-    Height = 77
+    Height = 97
     Align = alBottom
     Alignment = taLeftJustify
     BevelEdges = [beTop]
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 4
+    ExplicitTop = 464
     object Label1: TLabel
       Left = 3
       Top = 8
@@ -132,13 +138,12 @@ object MainForm: TMainForm
       Left = 113
       Top = 3
       Width = 425
-      Height = 69
+      Height = 92
       Margins.Left = 113
       Align = alTop
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitTop = 2
       object FilterHiddenWindowsCheckBox: TCheckBox
         AlignWithMargins = True
         Left = 3
@@ -146,6 +151,8 @@ object MainForm: TMainForm
         Width = 152
         Height = 17
         Caption = 'Filter hidden windows'
+        Checked = True
+        State = cbChecked
         TabOrder = 4
       end
       object FilterOverlappedWindowsCheckBox: TCheckBox
@@ -184,6 +191,8 @@ object MainForm: TMainForm
         Width = 152
         Height = 17
         Caption = 'Filter cloaked windows'
+        Checked = True
+        State = cbChecked
         TabOrder = 3
       end
       object FilterMonitorCheckBox: TCheckBox
@@ -193,7 +202,20 @@ object MainForm: TMainForm
         Width = 152
         Height = 17
         Caption = 'Only current monitor'
+        Checked = True
+        State = cbChecked
         TabOrder = 5
+      end
+      object FilterInactiveTopMostWindowsCheckBox: TCheckBox
+        AlignWithMargins = True
+        Left = 3
+        Top = 72
+        Width = 182
+        Height = 17
+        Caption = 'Filter inactive top most windows'
+        Checked = True
+        State = cbChecked
+        TabOrder = 6
       end
     end
   end

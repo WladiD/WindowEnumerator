@@ -39,6 +39,7 @@ type
     FilterCloakedWindowsCheckBox: TCheckBox;
     FilterHiddenWindowsCheckBox: TCheckBox;
     FilterMonitorCheckBox: TCheckBox;
+    FilterInactiveTopMostWindowsCheckBox: TCheckBox;
     procedure EnumerateButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -172,6 +173,7 @@ begin
     FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
     FWinEnumerator.CloakedWindowsFilter := FilterCloakedWindowsCheckBox.Checked;
     FWinEnumerator.MonitorFilter := FilterMonitorCheckBox.Checked;
+    FWinEnumerator.InactiveTopMostWindowsFilter := FilterInactiveTopMostWindowsCheckBox.Checked;
 
     if MainListBox.ItemIndex >= 0 then
       FSelectedWindow := MainListBox.Items.Objects[MainListBox.ItemIndex];

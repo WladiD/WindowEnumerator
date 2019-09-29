@@ -34,7 +34,7 @@ type
     Text: string;
     ClassName: string;
 
-    procedure Assign(Source: TWindow);
+    procedure Assign(Source: TWindow); virtual;
   end;
 
   TWindowList = class(TObjectList<TWindow>)
@@ -64,6 +64,7 @@ type
     FMonitorFilter: Boolean;
     FVirtualDesktopAvailable: Boolean;
     FVirtualDesktopManager: IVirtualDesktopManager;
+    FInactiveTopMostWindowsFilter: Boolean;
     FGetWindowRectFunction: TWindowRectFunction;
     FGetWindowTextFunction: TWindowStringFunction;
     FGetWindowClassNameFunction: TWindowStringFunction;
@@ -74,6 +75,7 @@ type
     procedure FilterOverlappedWindows;
     procedure FilterCloakedWindows;
     procedure FilterMonitor;
+    procedure FilterInactiveTopMostWindows;
     procedure FillWindowInfos;
 
     function IsWindowVisible(Handle: HWND; out Rect: TRect): Boolean;
@@ -102,6 +104,8 @@ type
     property CloakedWindowsFilter: Boolean read FCloakedWindowsFilter write FCloakedWindowsFilter;
     // Defines, whether the windows which are placed on other monitors should be filtered
     property MonitorFilter: Boolean read FMonitorFilter write FMonitorFilter;
+    // Defines, whether inactive top most windows should be filtered
+    property InactiveTopMostWindowsFilter: Boolean read FInactiveTopMostWindowsFilter write FInactiveTopMostWindowsFilter;
 
     property GetWindowRectFunction: TWindowRectFunction read FGetWindowRectFunction write FGetWindowRectFunction;
     property GetWindowTextFunction: TWindowStringFunction read FGetWindowTextFunction write FGetWindowTextFunction;
@@ -319,6 +323,33 @@ begin
       FWorkList.Delete(cc);
 end;
 
+procedure TWindowEnumerator.FilterInactiveTopMostWindows;
+var
+  ForegroundWindow: HWND;
+
+  function IsWindowTopMost(WindowHandle: HWND): Boolean;
+  var
+    ExStyle: NativeInt;
+  begin
+    ExStyle := GetWindowLong(WindowHandle, GWL_EXSTYLE);
+    Result := (ExStyle and WS_EX_TOPMOST) = WS_EX_TOPMOST;
+  end;
+
+  function IsWindowInactiveAndTopMost(Window: TWindow): Boolean;
+  begin
+    Result := (Window.Handle <> ForegroundWindow) and IsWindowTopMost(Window.Handle);
+  end;
+
+var
+  cc: Integer;
+begin
+  ForegroundWindow := GetForegroundWindow;
+
+  for cc := FWorkList.Count - 1 downto 0 do
+    if IsWindowInactiveAndTopMost(FWorkList[cc]) then
+      FWorkList.Delete(cc);
+end;
+
 procedure TWindowEnumerator.FillWindowInfos;
 var
   Window: TWindow;
@@ -426,6 +457,8 @@ begin
         FilterCloakedWindows;
       if FMonitorFilter then
         FilterMonitor;
+      if FInactiveTopMostWindowsFilter then
+        FilterInactiveTopMostWindows;
       FillWindowInfos;
     except
       FWorkList.Free;
