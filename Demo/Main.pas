@@ -137,8 +137,9 @@ procedure TMainForm.EnumerateButtonClick(Sender: TObject);
     Result := TStringList.Create;
     try
       for WI in WindowList do
-        Result.AddObject(Format('Handle: %d; Rect: (%s); Text: "%s"; ClassName: "%s"',
-          [WI.Handle, GetWindowRectAsString, WI.Text, WI.ClassName]), TObject(WI.Handle));
+        Result.AddObject(Format('Handle: %d; Rect: (%s); DPI: %d; Text: "%s"; ClassName: "%s"',
+          [WI.Handle, GetWindowRectAsString, GetDpiForWindow(WI.Handle), WI.Text, WI.ClassName]),
+          TObject(WI.Handle));
     except
       Result.Free;
       raise;

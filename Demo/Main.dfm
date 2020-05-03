@@ -20,25 +20,24 @@ object MainForm: TMainForm
   object FilterLabel: TLabel
     AlignWithMargins = True
     Left = 3
-    Top = 374
+    Top = 377
     Width = 535
     Height = 13
     Align = alBottom
     Caption = 'Filter by window style'
-    ExplicitTop = 352
     ExplicitWidth = 104
   end
   object MainListBox: TListBox
     Left = 0
     Top = 0
     Width = 541
-    Height = 371
+    Height = 374
     Align = alClient
-    DoubleBuffered = True
+    DoubleBuffered = False
     ItemHeight = 13
     ParentDoubleBuffered = False
     TabOrder = 0
-    ExplicitHeight = 349
+    ExplicitTop = -3
   end
   object IncludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -55,7 +54,6 @@ object MainForm: TMainForm
     BevelEdges = [beBottom]
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitTop = 400
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -71,7 +69,6 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitTop = 373
   end
   object EnumeratePanel: TPanel
     Left = 0
@@ -83,7 +80,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 3
-    ExplicitTop = 499
     object EnumerateButton: TButton
       Left = 113
       Top = 0
@@ -125,7 +121,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 4
-    ExplicitTop = 464
     object Label1: TLabel
       Left = 3
       Top = 8
