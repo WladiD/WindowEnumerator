@@ -3,7 +3,7 @@ object MainForm: TMainForm
   Top = 0
   Caption = 'MainForm'
   ClientHeight = 588
-  ClientWidth = 541
+  ClientWidth = 633
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -21,29 +21,17 @@ object MainForm: TMainForm
     AlignWithMargins = True
     Left = 3
     Top = 377
-    Width = 535
+    Width = 627
     Height = 13
     Align = alBottom
     Caption = 'Filter by window style'
     ExplicitWidth = 104
   end
-  object MainListBox: TListBox
-    Left = 0
-    Top = 0
-    Width = 541
-    Height = 374
-    Align = alClient
-    DoubleBuffered = False
-    ItemHeight = 13
-    ParentDoubleBuffered = False
-    TabOrder = 0
-    ExplicitTop = -3
-  end
   object IncludeFilterPanel: TFlowPanel
     AlignWithMargins = True
     Left = 10
     Top = 422
-    Width = 521
+    Width = 613
     Height = 17
     Margins.Left = 10
     Margins.Top = 5
@@ -53,13 +41,14 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelEdges = [beBottom]
     BevelOuter = bvNone
-    TabOrder = 1
+    TabOrder = 0
+    ExplicitWidth = 521
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
     Left = 10
     Top = 395
-    Width = 521
+    Width = 613
     Height = 17
     Margins.Left = 10
     Margins.Top = 5
@@ -68,28 +57,31 @@ object MainForm: TMainForm
     Align = alBottom
     Alignment = taLeftJustify
     BevelOuter = bvNone
-    TabOrder = 2
+    TabOrder = 1
+    ExplicitWidth = 521
   end
   object EnumeratePanel: TPanel
     Left = 0
     Top = 541
-    Width = 541
+    Width = 633
     Height = 47
     Align = alBottom
     BevelEdges = [beTop]
     BevelKind = bkSoft
     BevelOuter = bvNone
-    TabOrder = 3
+    TabOrder = 2
+    ExplicitWidth = 541
     object EnumerateButton: TButton
       Left = 113
       Top = 0
-      Width = 428
+      Width = 520
       Height = 45
       Align = alClient
       Caption = 'Enumerate windows'
       Default = True
       TabOrder = 0
       OnClick = EnumerateButtonClick
+      ExplicitWidth = 428
     end
     object Panel1: TPanel
       Left = 0
@@ -113,14 +105,15 @@ object MainForm: TMainForm
   object OptionsPanel: TPanel
     Left = 0
     Top = 444
-    Width = 541
+    Width = 633
     Height = 97
     Align = alBottom
     Alignment = taLeftJustify
     BevelEdges = [beTop]
     BevelKind = bkSoft
     BevelOuter = bvNone
-    TabOrder = 4
+    TabOrder = 3
+    ExplicitWidth = 541
     object Label1: TLabel
       Left = 3
       Top = 8
@@ -132,13 +125,14 @@ object MainForm: TMainForm
       AlignWithMargins = True
       Left = 113
       Top = 3
-      Width = 425
+      Width = 517
       Height = 92
       Margins.Left = 113
       Align = alTop
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
+      ExplicitWidth = 425
       object FilterHiddenWindowsCheckBox: TCheckBox
         AlignWithMargins = True
         Left = 3
@@ -213,6 +207,45 @@ object MainForm: TMainForm
         TabOrder = 6
       end
     end
+  end
+  object MainList: TListView
+    Left = 0
+    Top = 0
+    Width = 633
+    Height = 374
+    Align = alClient
+    Columns = <
+      item
+        Caption = 'Handle'
+        Width = 60
+      end
+      item
+        Caption = 'Rect'
+        Width = 150
+      end
+      item
+        Caption = 'DPI'
+        Width = 40
+      end
+      item
+        Caption = 'Text'
+        Width = 225
+      end
+      item
+        Caption = 'ClassName'
+        Width = 150
+      end>
+    ColumnClick = False
+    DoubleBuffered = True
+    HideSelection = False
+    OwnerData = True
+    ReadOnly = True
+    RowSelect = True
+    ParentDoubleBuffered = False
+    TabOrder = 4
+    ViewStyle = vsReport
+    OnData = MainListData
+    ExplicitWidth = 628
   end
   object AutoUpdateTimer: TTimer
     Enabled = False

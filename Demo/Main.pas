@@ -17,11 +17,12 @@ uses
   Vcl.StdCtrls,
   Vcl.ExtCtrls,
   Vcl.Menus,
+  Vcl.ComCtrls,
+
   WindowEnumerator;
 
 type
   TMainForm = class(TForm)
-    MainListBox: TListBox;
     EnumerateButton: TButton;
     IncludeFilterPanel: TFlowPanel;
     FilterLabel: TLabel;
@@ -40,16 +41,19 @@ type
     FilterHiddenWindowsCheckBox: TCheckBox;
     FilterMonitorCheckBox: TCheckBox;
     FilterInactiveTopMostWindowsCheckBox: TCheckBox;
+    MainList: TListView;
     procedure EnumerateButtonClick(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure AutoUpdateTimerTimer(Sender: TObject);
     procedure AutoUpdateCheckBoxClick(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
+    procedure MainListData(Sender: TObject; Item: TListItem);
 
   private
     FWinEnumerator: TWindowEnumerator;
-    FSelectedWindow: TObject;
+    FSelectedWindow: HWND;
+    FMainWinList: TWindowList;
 
     procedure AutoSizeFilterPanels;
   end;
@@ -107,6 +111,7 @@ end;
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
   FWinEnumerator.Free;
+  FMainWinList.Free;
 end;
 
 procedure TMainForm.AutoUpdateCheckBoxClick(Sender: TObject);
@@ -120,31 +125,6 @@ begin
 end;
 
 procedure TMainForm.EnumerateButtonClick(Sender: TObject);
-
-  function CreateStringsFromWindowList(WindowList: TWindowList): TStrings;
-  var
-    WI: TWindow;
-
-    function GetWindowRectAsString: string;
-    begin
-      if WI.Rect.IsEmpty then
-        Result := '(IsEmpty)'
-      else
-        Result := Format('%d, %d, %d, %d', [WI.Rect.Left, WI.Rect.Top, WI.Rect.Right, WI.Rect.Bottom]);
-    end;
-
-  begin
-    Result := TStringList.Create;
-    try
-      for WI in WindowList do
-        Result.AddObject(Format('Handle: %d; Rect: (%s); DPI: %d; Text: "%s"; ClassName: "%s"',
-          [WI.Handle, GetWindowRectAsString, GetDpiForWindow(WI.Handle), WI.Text, WI.ClassName]),
-          TObject(WI.Handle));
-    except
-      Result.Free;
-      raise;
-    end;
-  end;
 
   function GetCheckedMask(ContainerPanel: TWinControl): NativeInt;
   var
@@ -163,43 +143,33 @@ procedure TMainForm.EnumerateButtonClick(Sender: TObject);
 
 var
   WinList: TWindowList;
-  WinStrings: TStrings;
 begin
-  WinStrings := nil;
-  try
-    FWinEnumerator.ExcludeMask := GetCheckedMask(ExcludeFilterPanel);
-    FWinEnumerator.IncludeMask := GetCheckedMask(IncludeFilterPanel);
-    FWinEnumerator.VirtualDesktopFilter := OnlyCurrendVDCheckBox.Checked;
-    FWinEnumerator.HiddenWindowsFilter := FilterHiddenWindowsCheckBox.Checked;
-    FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
-    FWinEnumerator.CloakedWindowsFilter := FilterCloakedWindowsCheckBox.Checked;
-    FWinEnumerator.MonitorFilter := FilterMonitorCheckBox.Checked;
-    FWinEnumerator.InactiveTopMostWindowsFilter := FilterInactiveTopMostWindowsCheckBox.Checked;
+  FWinEnumerator.ExcludeMask := GetCheckedMask(ExcludeFilterPanel);
+  FWinEnumerator.IncludeMask := GetCheckedMask(IncludeFilterPanel);
+  FWinEnumerator.VirtualDesktopFilter := OnlyCurrendVDCheckBox.Checked;
+  FWinEnumerator.HiddenWindowsFilter := FilterHiddenWindowsCheckBox.Checked;
+  FWinEnumerator.OverlappedWindowsFilter := FilterOverlappedWindowsCheckBox.Checked;
+  FWinEnumerator.CloakedWindowsFilter := FilterCloakedWindowsCheckBox.Checked;
+  FWinEnumerator.MonitorFilter := FilterMonitorCheckBox.Checked;
+  FWinEnumerator.InactiveTopMostWindowsFilter := FilterInactiveTopMostWindowsCheckBox.Checked;
 
-    if MainListBox.ItemIndex >= 0 then
-      FSelectedWindow := MainListBox.Items.Objects[MainListBox.ItemIndex];
+  if MainList.ItemIndex >= 0 then
+    FSelectedWindow := FMainWinList[MainList.ItemIndex].Handle;
 
-    WinList := FWinEnumerator.Enumerate;
-    try
-      if FilterSelfCheckBox.Checked then
-        WinList.Remove(Handle);
-      WinStrings := CreateStringsFromWindowList(WinList);
-    finally
-      WinList.Free;
-    end;
+  WinList := FWinEnumerator.Enumerate;
 
-    if WinStrings.Equals(MainListBox.Items) then
-      Exit;
+  if FilterSelfCheckBox.Checked then
+    WinList.Remove(Handle);
 
-    MainListBox.Items.Assign(WinStrings);
+  FMainWinList.Free;
+  FMainWinList := WinList;
+  MainList.Items.Count := FMainWinList.Count;
+  MainList.Invalidate;
 
-    if Assigned(FSelectedWindow) then
-      MainListBox.ItemIndex := MainListBox.Items.IndexOfObject(FSelectedWindow);
+  if FSelectedWindow <> 0 then
+    MainList.ItemIndex := FMainWinList.IndexOf(FSelectedWindow);
 
-    Caption := Format('Matched windows: %d', [WinStrings.Count]);
-  finally
-    WinStrings.Free;
-  end;
+  Caption := Format('Matched windows: %d', [WinList.Count]);
 end;
 
 procedure TMainForm.AutoSizeFilterPanels;
@@ -213,7 +183,7 @@ begin
   OptionsPanel.AutoSize := False;
 
   // The bottom order can be jumbled after AutoSize, so we must correct it
-  FilterLabel.Top := MainListBox.Top + MainListBox.Height + 5;
+  FilterLabel.Top := MainList.Top + MainList.Height + 5;
   ExcludeFilterPanel.Top := FilterLabel.Top + FilterLabel.Height + 5;
   IncludeFilterPanel.Top := ExcludeFilterPanel.Top + ExcludeFilterPanel.Height + 5;
   OptionsPanel.Top := IncludeFilterPanel.Top + IncludeFilterPanel.Height + 5;
@@ -223,6 +193,32 @@ end;
 procedure TMainForm.FormResize(Sender: TObject);
 begin
   AutoSizeFilterPanels;
+end;
+
+procedure TMainForm.MainListData(Sender: TObject; Item: TListItem);
+var
+  Index: Integer;
+  WI: TWindow;
+
+  function GetWindowRectAsString: string;
+  begin
+    if WI.Rect.IsEmpty then
+      Result := '(IsEmpty)'
+    else
+      Result := Format('%d, %d, %d, %d', [WI.Rect.Left, WI.Rect.Top, WI.Rect.Right, WI.Rect.Bottom]);
+  end;
+
+begin
+  Index := Item.Index;
+  if not (Assigned(FMainWinList) and (Index < FMainWinList.Count)) then
+    Exit;
+
+  WI := FMainWinList[Index];
+  Item.Caption := IntToStr(WI.Handle);
+  Item.SubItems.Add(GetWindowRectAsString);
+  Item.SubItems.Add(IntToStr(GetDpiForWindow(WI.Handle)));
+  Item.SubItems.Add(WI.Text);
+  Item.SubItems.Add(WI.ClassName);
 end;
 
 end.
