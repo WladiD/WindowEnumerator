@@ -42,7 +42,6 @@ object MainForm: TMainForm
     BevelEdges = [beBottom]
     BevelOuter = bvNone
     TabOrder = 0
-    ExplicitWidth = 521
   end
   object ExcludeFilterPanel: TFlowPanel
     AlignWithMargins = True
@@ -58,7 +57,6 @@ object MainForm: TMainForm
     Alignment = taLeftJustify
     BevelOuter = bvNone
     TabOrder = 1
-    ExplicitWidth = 521
   end
   object EnumeratePanel: TPanel
     Left = 0
@@ -70,7 +68,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 2
-    ExplicitWidth = 541
     object EnumerateButton: TButton
       Left = 113
       Top = 0
@@ -81,7 +78,6 @@ object MainForm: TMainForm
       Default = True
       TabOrder = 0
       OnClick = EnumerateButtonClick
-      ExplicitWidth = 428
     end
     object Panel1: TPanel
       Left = 0
@@ -113,7 +109,6 @@ object MainForm: TMainForm
     BevelKind = bkSoft
     BevelOuter = bvNone
     TabOrder = 3
-    ExplicitWidth = 541
     object Label1: TLabel
       Left = 3
       Top = 8
@@ -126,13 +121,12 @@ object MainForm: TMainForm
       Left = 113
       Top = 3
       Width = 517
-      Height = 92
+      Height = 69
       Margins.Left = 113
       Align = alTop
       AutoSize = True
       BevelOuter = bvNone
       TabOrder = 0
-      ExplicitWidth = 425
       object FilterHiddenWindowsCheckBox: TCheckBox
         AlignWithMargins = True
         Left = 3
@@ -197,8 +191,8 @@ object MainForm: TMainForm
       end
       object FilterInactiveTopMostWindowsCheckBox: TCheckBox
         AlignWithMargins = True
-        Left = 3
-        Top = 72
+        Left = 319
+        Top = 49
         Width = 182
         Height = 17
         Caption = 'Filter inactive top most windows'
@@ -224,8 +218,8 @@ object MainForm: TMainForm
         Width = 150
       end
       item
-        Caption = 'DPI'
-        Width = 40
+        Caption = 'DPI (Awareness)'
+        Width = 100
       end
       item
         Caption = 'Text'
@@ -235,7 +229,6 @@ object MainForm: TMainForm
         Caption = 'ClassName'
         Width = 150
       end>
-    ColumnClick = False
     DoubleBuffered = True
     HideSelection = False
     OwnerData = True
@@ -245,7 +238,6 @@ object MainForm: TMainForm
     TabOrder = 4
     ViewStyle = vsReport
     OnData = MainListData
-    ExplicitWidth = 628
   end
   object AutoUpdateTimer: TTimer
     Enabled = False

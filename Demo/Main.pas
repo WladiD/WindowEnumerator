@@ -208,6 +208,23 @@ var
       Result := Format('%d, %d, %d, %d', [WI.Rect.Left, WI.Rect.Top, WI.Rect.Right, WI.Rect.Bottom]);
   end;
 
+  function GetDPIAwareness: string;
+  var
+    DPIAC: DPI_AWARENESS_CONTEXT;
+    DPIA: DPI_AWARENESS;
+  begin
+    DPIAC := GetWindowDpiAwarenessContext(WI.Handle);
+    DPIA := GetAwarenessFromDpiAwarenessContext(DPIAC);
+    if DPIA = DPI_AWARENESS_UNAWARE then
+      Result := 'UNAWARE'
+    else if DPIA = DPI_AWARENESS_SYSTEM_AWARE then
+      Result := 'SYSTEM_AWARE'
+    else if DPIA = DPI_AWARENESS_PER_MONITOR_AWARE then
+      Result := 'PER_MONITOR_AWARE'
+    else
+      Result := '';
+  end;
+
 begin
   Index := Item.Index;
   if not (Assigned(FMainWinList) and (Index < FMainWinList.Count)) then
@@ -216,7 +233,7 @@ begin
   WI := FMainWinList[Index];
   Item.Caption := IntToStr(WI.Handle);
   Item.SubItems.Add(GetWindowRectAsString);
-  Item.SubItems.Add(IntToStr(GetDpiForWindow(WI.Handle)));
+  Item.SubItems.Add(Format('%d (%s)', [GetDpiForWindow(WI.Handle), GetDPIAwareness]));
   Item.SubItems.Add(WI.Text);
   Item.SubItems.Add(WI.ClassName);
 end;
